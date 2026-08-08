@@ -27,13 +27,15 @@ export const Card: React.FC<{ card: BossCard; badgeScale?: number }> = ({ card, 
         />
       </div>
 
-      {/* name + role */}
-      <div style={{ position: "absolute", left: TEXT.left, top: sc(card.textTop), width: TEXT.w, display: "flex", flexDirection: "column", gap: sc(card.gap) }}>
-        <div style={{ fontFamily: "SF Pro Display", fontWeight: 700, fontSize: TEXT.nameSize, lineHeight: `${TEXT.nameLH}px`, color: NAME_COLOR, textTransform: "uppercase" }}>
+      {/* name + role — exact Figma structure (3249:31594): name <p>, then a fixed
+          41px role box with the role text vertically centred (that centred box is
+          what creates the gap between the name and the role). */}
+      <div style={{ position: "absolute", left: TEXT.left, top: sc(card.textTop), width: TEXT.w, display: "flex", flexDirection: "column", gap: sc(card.gap), alignItems: "flex-start" }}>
+        <div style={{ width: "100%", fontFamily: "SF Pro Display", fontWeight: 700, fontSize: TEXT.nameSize, lineHeight: `${TEXT.nameLH}px`, color: NAME_COLOR, textTransform: "uppercase" }}>
           {card.name}
         </div>
-        <div style={{ fontFamily: "SF Pro Text", fontWeight: 600, fontSize: TEXT.roleSize, lineHeight: `${sc(card.roleLH)}px`, letterSpacing: TEXT.roleTracking, color: ROLE_COLOR, textTransform: "uppercase" }}>
-          {card.role}
+        <div style={{ width: "100%", height: TEXT.roleBoxH, display: "flex", flexDirection: "column", justifyContent: "center", fontFamily: "SF Pro Text", fontWeight: 600, fontSize: TEXT.roleSize, letterSpacing: TEXT.roleTracking, color: ROLE_COLOR, textTransform: "uppercase" }}>
+          <div style={{ lineHeight: `${sc(card.roleLH)}px` }}>{card.role}</div>
         </div>
       </div>
 

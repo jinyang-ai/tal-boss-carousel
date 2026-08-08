@@ -6,22 +6,22 @@ import {
 import { CardStrip } from "./CardStrip";
 import { loadFonts } from "./fonts";
 import {
-  COMP_W, COMP_H, BG, DIM,
-  SLIDE, HOLD, CYCLE, N_CARDS, STEP, LOOP, CARD_W,
-  APERTURE, APERTURE_CX, PHONE, SCRIM, WORDMARK, HEADLINE, HEADLINE_COLOR,
+  COMP_W, COMP_H, BG, DIM, SCREEN_BG,
+  SLIDE, HOLD, CYCLE, N_CARDS, STEP, CARD_W,
+  APERTURE, APERTURE_CX, PHONE, SCRIM, WORDMARK, HEADLINE, HEADLINE_COLOR, EYEBROW,
 } from "./layout";
 
 loadFonts();
 
 // ---- knobs ------------------------------------------------------------------
 const DIRECTION = 1; // 1 = strip travels left->right (new cards enter from the left)
-const CENTER0 = 1; // card index centred at frame 0 (1 = Tapish, matching the Figma still)
+const CENTER0 = 0; // card index centred at frame 0 (0 = Tapish, still the opener after removals)
 // optional polish — off by default so frame 0 matches the static creative exactly
 const ENABLE_CENTER_EMPHASIS = false;
 const ENABLE_BADGE_POP = false;
 // -----------------------------------------------------------------------------
 
-export const BossCarousel: React.FC = () => {
+export const BossCarousel: React.FC<{ showNeighbors?: boolean; pitch?: number }> = ({ showNeighbors = true, pitch = STEP }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -36,9 +36,10 @@ export const BossCarousel: React.FC = () => {
   const p = cycleIndex + progress;
 
   // wrap into one loop length so the strip never runs out
-  const travel = (((DIRECTION * p * STEP) % LOOP) + LOOP) % LOOP;
+  const loop = pitch * N_CARDS;
+  const travel = (((DIRECTION * p * pitch) % loop) + loop) % loop;
   // base places us in the middle copy (invisible wrap); +CENTER0 centres Tapish at frame 0
-  const translateX = APERTURE_CX - CARD_W / 2 - (N_CARDS + CENTER0) * STEP + travel;
+  const translateX = APERTURE_CX - CARD_W / 2 - (N_CARDS + CENTER0) * pitch + travel;
 
   // badge pop: 0.9 -> 1.0 over the first frames of each HOLD
   let badgeScale = 1;
@@ -48,16 +49,30 @@ export const BossCarousel: React.FC = () => {
   }
 
   const strip = (
-    <CardStrip translateX={translateX} centerEmphasis={ENABLE_CENTER_EMPHASIS} badgeScale={badgeScale} />
+    <CardStrip translateX={translateX} step={pitch} centerEmphasis={ENABLE_CENTER_EMPHASIS} badgeScale={badgeScale} />
   );
 
   return (
     <AbsoluteFill style={{ backgroundColor: BG }}>
-      {/* 1. dimmed neighbours bleeding past the phone (behind everything) */}
-      <AbsoluteFill style={{ filter: `brightness(${DIM})` }}>{strip}</AbsoluteFill>
+      {/* 1. neighbours bleeding past the phone (behind everything). Off for the
+            screen-only variant, so the wipe stays inside the phone screen and the
+            cards vanish behind the bezel edges instead of sliding across the bg. */}
+      {showNeighbors && <AbsoluteFill style={{ filter: `brightness(${DIM})` }}>{strip}</AbsoluteFill>}
 
-      {/* 2. phone chrome: bezel + white screen + status bar + "10+ BOSSES" */}
+      {/* 2. phone chrome: bezel + white screen + status bar (baked eyebrow masked below) */}
       <Img src={staticFile(PHONE.src)} style={{ position: "absolute", left: PHONE.x, top: PHONE.y, width: PHONE.w, height: PHONE.h }} />
+
+      {/* 2b. mask the baked "10+ BOSSES" with the screen colour, then draw the live eyebrow */}
+      <div style={{ position: "absolute", left: APERTURE.x + 12, top: EYEBROW.maskY, width: APERTURE.w - 24, height: EYEBROW.maskH, backgroundColor: SCREEN_BG }} />
+      <div
+        style={{
+          position: "absolute", left: EYEBROW.cx, top: EYEBROW.cy, transform: "translate(-50%, -50%)",
+          fontFamily: "Obviously", fontWeight: 600, fontSize: EYEBROW.fontSize, letterSpacing: EYEBROW.letterSpacing,
+          color: EYEBROW.color, textTransform: "uppercase", whiteSpace: "nowrap", lineHeight: 1.04,
+        }}
+      >
+        {EYEBROW.text}
+      </div>
 
       {/* 3. bottom scrim — below the bright cards, above the white screen */}
       <div

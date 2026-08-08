@@ -11,18 +11,19 @@ const TRIPLED = [...CARDS, ...CARDS, ...CARDS];
 
 export const CardStrip: React.FC<{
   translateX: number;
+  step?: number;
   centerEmphasis?: boolean;
   badgeScale?: number;
-}> = ({ translateX, centerEmphasis = false, badgeScale = 1 }) => {
+}> = ({ translateX, step = STEP, centerEmphasis = false, badgeScale = 1 }) => {
   return (
     <div style={{ position: "absolute", left: 0, top: CARD_TOP, height: CARD_H, transform: `translateX(${translateX}px)` }}>
       {TRIPLED.map((card, j) => {
-        const centreX = translateX + j * STEP + CARD_W / 2;
+        const centreX = translateX + j * step + CARD_W / 2;
         const scale = centerEmphasis
-          ? interpolate(Math.abs(centreX - APERTURE_CX), [0, STEP], [1.0, 0.96], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
+          ? interpolate(Math.abs(centreX - APERTURE_CX), [0, step], [1.0, 0.96], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })
           : 1;
         return (
-          <div key={j} style={{ position: "absolute", left: j * STEP, top: 0, width: CARD_W, height: CARD_H, transform: `scale(${scale})`, transformOrigin: "center" }}>
+          <div key={j} style={{ position: "absolute", left: j * step, top: 0, width: CARD_W, height: CARD_H, transform: `scale(${scale})`, transformOrigin: "center" }}>
             <Card card={card} badgeScale={badgeScale} />
           </div>
         );

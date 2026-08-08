@@ -7,6 +7,8 @@
 // live anywhere else in the code.
 // ---------------------------------------------------------------------------
 
+import { CARDS } from "./cards";
+
 export const FIGMA_W = 720; // raw: root frame width
 export const FIGMA_H = 900; // raw: root frame height
 export const COMP_W = 1080;
@@ -17,9 +19,12 @@ export const SCALE = COMP_W / FIGMA_W; // 1.5
 export const sc = (v: number): number => v * SCALE;
 
 // ---- Colours (design tokens + sampled from the Figma render) ----------------
-export const BG = "#1c1c1e"; // sampled frame background (token Surface/90)
+// Base/frame background is the grey #1c1c1e (token Surface/90). The card fill
+// stays the deeper black #0b0b0d (token Grey/90, which the scrim also fades to)
+// so the card reads as a rich black against the grey backdrop.
+export const BG = "#1c1c1e"; // frame background (base)
 export const SCREEN_BG = "#fbfbfc"; // raw: screen 3249:31559 fill
-export const CARD_BG = "#1c1c1e"; // raw: card fill (token Surface/90)
+export const CARD_BG = "#0b0b0d"; // card fill
 export const NAME_COLOR = "#fbfbfc"; // raw: card name 3249:31595
 export const ROLE_COLOR = "#efeff4"; // raw: card role (token Surface/25)
 export const SCRIM_COLOR = "#0b0b0d"; // raw: bottom scrim target (token Grey/90)
@@ -30,8 +35,8 @@ export const FPS = 30;
 export const SLIDE = 18; // frames of movement  (0.60s)
 export const HOLD = 27; // frames of rest      (0.90s)
 export const CYCLE = SLIDE + HOLD; // 45
-export const N_CARDS = 10;
-export const DURATION = CYCLE * N_CARDS; // 450 -> frame DURATION == frame 0 (seamless)
+export const N_CARDS = CARDS.length; // derives from the card list (removals auto-adjust)
+export const DURATION = CYCLE * N_CARDS; // frame DURATION == frame 0 (seamless)
 
 // ---- Headline (3249:31580) --------------------------------------------------
 export const HEADLINE = {
@@ -48,8 +53,11 @@ export const HEADLINE = {
 
 // ---- Phone chrome PNG (3249:31557) ------------------------------------------
 // The exported render of the phone node: realistic bezel + Dynamic Island +
-// white #fbfbfc screen + iOS status bar + "10+ BOSSES" eyebrow. Transparent
-// outside the phone. Exported at 3x (1693 x 2202), clipped to the frame bottom.
+// white #fbfbfc screen + iOS status bar. Exported at 3x (1693 x 2202), clipped
+// to the frame bottom. NOTE: Figma's export carried the source photo's baked
+// near-black background around the device (a #161618->#020202 gradient slab) —
+// that's been stripped to true transparency (flood fill + halo cleanup; original
+// kept as phone-chrome-baked.png) so the flat BG shows uniformly around the phone.
 export const PHONE = {
   src: "boss-carousel/phone-chrome.png",
   x: sc(78.330078125), // raw bbox x
@@ -70,6 +78,20 @@ export const APERTURE = {
 };
 export const APERTURE_CX = APERTURE.x + APERTURE.w / 2; // aperture centre x (comp)
 
+// ---- Eyebrow (3249:31579) ---------------------------------------------------
+// Rendered live in Obviously Semibold (Figma had "10+ Bosses"). A white band
+// masks the baked eyebrow in phone-chrome.png, then this draws on top.
+export const EYEBROW = {
+  text: "BOSSES OF BANGALORE",
+  cx: APERTURE_CX, // centred on the screen
+  cy: sc(166 + 136), // raw: phone.y + eyebrow phone-rel centre (top-[136px]) = root 302
+  fontSize: sc(30), // Figma "10+ Bosses" was 36.774; smaller so the longer string fits
+  letterSpacing: sc(-1.2), // Figma tracking was -1.8387; eased for the longer string
+  color: "#1c1c1e", // raw eyebrow colour (Surface/90)
+  maskY: sc(272), // white mask band top (root px)
+  maskH: sc(62), // white mask band height (covers the baked "10+ BOSSES")
+};
+
 // ---- Card geometry (children of strip 3249:31582) ---------------------------
 export const CARD_W = sc(404); // raw card width
 export const CARD_H = sc(423); // raw card height
@@ -79,9 +101,18 @@ export const LOOP = STEP * N_CARDS; // one full carousel period
 export const CARD_TOP = sc(346); // raw: strip root y (cards are items-center => card top)
 export const CARD_RADIUS = sc(30); // raw: rounded-[30px]
 
+// Screen-only variant pitch: wide enough that NO neighbour card peeks into the
+// aperture at rest (kills the dark card sliver at the screen edges). Only the
+// centred card shows at rest; the next card appears during the wipe. Minimum for
+// zero peek = CARD_W/2 + APERTURE.w/2, plus a small anti-alias buffer.
+export const SCREEN_STEP = CARD_W / 2 + APERTURE.w / 2 + sc(4);
+
 // Card interior (all raw Figma px, relative to the 404x423 card) --------------
 export const PORTRAIT = { x: sc(9), y: sc(10), w: sc(386), h: sc(300), r: sc(22) };
-export const TEXT = { left: sc(21), w: sc(361), nameSize: sc(32), nameLH: sc(33), roleSize: sc(21), roleTracking: sc(0.84) };
+// name p: SF Pro Display Bold 32/lh33. role sits in a FIXED 41px box, vertically
+// centred (Figma `h-[41px] justify-center`), with its own line-height (roleLH per
+// card) — that centred box is what spaces the role away from the name.
+export const TEXT = { left: sc(21), w: sc(361), nameSize: sc(32), nameLH: sc(33), roleSize: sc(21), roleBoxH: sc(41), roleTracking: sc(0.84) };
 export const BADGE = { left: sc(262), top: sc(221), size: sc(114), purpleBg: "#3b006a", ringW: sc(5.876) };
 
 // ---- Bottom scrim (3249:31581) ---------------------------------------------

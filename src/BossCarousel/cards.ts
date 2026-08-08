@@ -25,12 +25,6 @@ export type BossCard = {
 
 export const CARDS: BossCard[] = [
   {
-    id: "srikanth", name: "Srikanth a", role: "Product manager 2",
-    portrait: "srikanth.png", p: { x: -75, y: 0, w: 545, h: 545 },
-    logo: "l935903.png", l: { x: -12, y: -12, w: 138, h: 138 },
-    badge: "white", textTop: 328, gap: 2, roleLH: 16,
-  },
-  {
     id: "tapish", name: "Tapish k", role: "product manager 2",
     portrait: "tapish.png", p: { x: -95, y: -226, w: 661, h: 661 },
     logo: "l935901.png", l: { x: -17, y: -17, w: 148, h: 148 },
@@ -41,12 +35,6 @@ export const CARDS: BossCard[] = [
     portrait: "logarajan.png", p: { x: -359, y: -171, w: 910, h: 910 },
     logo: "l935890.png", l: { x: -18.804, y: -17.629, w: 151.608, h: 151.608 },
     badge: "purple", textTop: 328, gap: 2, roleLH: 16,
-  },
-  {
-    id: "ayush", name: "Ayush K", role: "Director of product management",
-    portrait: "ayush.png", p: { x: -11, y: -21, w: 408, h: 408 },
-    logo: "l935899.png", l: { x: 4, y: 4, w: 106, h: 106 },
-    badge: "white-shadow", textTop: 323, gap: 9, roleLH: 24,
   },
   {
     id: "puneet", name: "Puneet J", role: "Director of product management",

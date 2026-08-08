@@ -1,61 +1,78 @@
-# Tal Boss — "PM Leaders" carousel (Remotion)
+# Tal Boss — "Bosses of Bangalore" carousel (Remotion)
 
-A seamlessly looping carousel of hiring-manager profile cards that slides sideways,
-pauses when a card is centred in the phone screen, then slides to the next — nothing
-else moves. Built to match the Figma creative
+A seamlessly looping carousel of hiring-manager profile cards inside an iPhone.
+Cards slide sideways, pause dead-centre in the screen, then slide on — nothing else
+moves, and the loop has no visible seam. Built from the Figma creative
 [`Creatives` node `3249:31556`](https://www.figma.com/design/PjtEF4yHgCQhvgy8buO4q5/Creatives?node-id=3249-31556).
 
-## Output
+## The two variants
 
-- **`out/tal-boss-carousel.gif`** — the deliverable, 540×675, ~15 fps, infinite loop (~6.3 MB)
-- **`out/tal-boss-carousel.mp4`** — full-quality 1080×1350, 30 fps, 15 s
+| Composition | Output | What it looks like |
+|---|---|---|
+| `BossCarouselScreen` | `out/tal-boss-carousel-screen.{gif,mp4}` | **Screen-only** — the wipe happens entirely inside the phone screen; nothing outside the phone moves. Card pitch is widened so no neighbour peeks at rest. |
+| `BossCarousel` | `out/tal-boss-carousel.{gif,mp4}` | **Side-bleed** — the card strip runs edge-to-edge behind the phone (the original Figma look). |
+
+Current deliverables: GIF 540×675 @ ~15 fps, infinite loop (3.4 MB / 5.4 MB); MP4
+1080×1350 @ 30 fps, ~12 s (1.8 MB / 2.5 MB).
 
 ```bash
 npm install
-npm run dev          # open Remotion Studio
-npm run render-gif   # out/tal-boss-carousel.gif
-npm run render-mp4   # out/tal-boss-carousel.mp4
-npm run still        # out/still.png (frame 0)
+npm run dev                 # Remotion Studio
+npm run render-gif-screen   # screen-only GIF   (the main deliverable)
+npm run render-mp4-screen   # screen-only MP4
+npm run render-gif          # side-bleed GIF
+npm run render-mp4          # side-bleed MP4
+npm run still               # frame 0 PNG
 ```
 
-## How it works
+## Design decisions / current state
 
-The composition is authored at **1080×1350** (the Figma root is 720×900, so `SCALE = 1.5`).
-`src/BossCarousel/layout.ts` holds every geometric value with its raw Figma source in a
-comment — nothing is a magic number.
+- **Cast**: 8 cards (left→right): Tapish K, Logarajan M, Puneet J, Piyush Gupta,
+  Ankit Agarwal, Akash Mehta, Meet Pathak, Kapil Thakur. Ayush K and Srikanth A
+  were removed on request. `N_CARDS` derives from `cards.ts`, so adding/removing a
+  card automatically adjusts the loop length (`duration = 45 frames × N`).
+- **Eyebrow**: "BOSSES OF BANGALORE" (was "10+ BOSSES"), rendered live in
+  Obviously Semibold — a white band masks the text baked into the phone PNG, so the
+  copy is editable in `layout.ts → EYEBROW.text`.
+- **Colours**: base background `#1c1c1e` (grey, token Surface/90); card fill
+  `#0b0b0d` (deep black, token Grey/90 — same tone the bottom scrim fades to);
+  screen `#fbfbfc`.
+- **Motion**: slide 18 f → hold 27 f per card @30 fps, expo-out easing. Frame 0
+  centres Tapish. Frame `45 × N` is pixel-identical to frame 0 (verified), so the
+  GIF loops seamlessly.
+- Optional flags in `BossCarousel.tsx` (both implemented, off by default):
+  `ENABLE_CENTER_EMPHASIS`, `ENABLE_BADGE_POP`.
 
-Layer stack (back → front):
+## How it's built
 
-1. Background `#1c1c1e`
-2. **Dim/neighbour strip** — the full card row, full width, behind the phone (the cards
-   bleeding past the phone are at full brightness in the reference; `DIM = 1.0`).
-3. **Phone chrome** — `phone-chrome.png`, Figma's own 3× render of the phone node: bezel +
-   Dynamic Island + white `#fbfbfc` screen + iOS status bar + "10+ BOSSES" eyebrow.
-4. **Bottom scrim** — full-width gradient fading to `#0b0b0d`, below the cards.
-5. **Bright strip** — the same `<CardStrip>`, clipped to the screen aperture (rounded).
-6. **tal BOSS wordmark**, then the **headline**.
+Composition space is 1080×1350 (Figma root is 720×900 → scale ×1.5). Every
+geometric value lives in `src/BossCarousel/layout.ts` with the raw Figma number it
+came from — no magic numbers elsewhere.
 
-The dim strip and the bright strip render the **same `<CardStrip>` with the same
-`translateX`**, so the cards outside and inside the phone are always in perfect register.
+Layer stack (back → front): background → card strip (side-bleed variant only) →
+phone chrome PNG → eyebrow mask + live eyebrow → bottom scrim → bright card strip
+clipped to the screen aperture (radius 63.76 from Figma) → wordmark → headline.
+The outside strip and the in-screen strip render the same `<CardStrip>` with the
+same `translateX`, so they can never drift out of register.
 
-### The cards
+### Gotchas we hit (worth knowing before editing)
 
-The whole strip lives outside the frame, and Figma clips every export/screenshot to the
-frame — so the strip can't be exported as one image. Instead each card is rebuilt in code
-(`Card.tsx` + `cards.ts`) from its Figma source portrait, company logo, exact per-card crop,
-badge treatment, and live SF Pro text. This composites in code (no frame clipping) and keeps
-the register lock.
-
-### Motion
-
-`slide (18f) → hold (27f)` per card, `CYCLE = 45`, `durationInFrames = CYCLE × 10 = 450`, so
-frame 450 lands exactly on frame 0 — the loop is seamless (verified: frame 0 == frame 450,
-0 pixel diff). Frame 0 centres Tapish, matching the Figma still. Knobs live at the top of
-`BossCarousel.tsx` (`DIRECTION`, `ENABLE_CENTER_EMPHASIS`, `ENABLE_BADGE_POP` — both effects
-implemented, off by default so frame 0 matches the static creative).
+1. **Figma clips every export/screenshot to the containing frame.** The 10-card
+   strip lives mostly outside the frame, so it cannot be exported as one image
+   (off-frame nodes render 1×1). Cards are therefore rebuilt in code from each
+   card's portrait/logo assets + exact Figma crops (`cards.ts`), with live SF Pro
+   text.
+2. **The phone export carried a baked near-black backdrop** from its source photo
+   (a `#161618→#020202` slab filling the export rect). Invisible on the original
+   dark design, it showed as a "second shade" on flat backgrounds. It's been
+   stripped to true transparency (flood fill + fringe cleanup) in
+   `phone-chrome.png`; the untouched export is kept as `phone-chrome-baked.png`.
+3. **Remotion's `--number-of-gif-loops=0` means *no* loop** (unlike ffmpeg).
+   Omit the flag entirely for an infinitely looping GIF.
 
 ## Fonts
 
-Real Figma faces, vendored in `public/fonts/` and loaded before the first frame:
-SF Pro Display (Semibold/Bold) + SF Pro Text (Semibold). The "10+ BOSSES" eyebrow
-(Obviously Semibold) and the status bar are baked into `phone-chrome.png` (Figma's render).
+Vendored in `public/fonts/`, loaded via `FontFace` before the first frame:
+SF Pro Display Semibold/Bold (headline, names), SF Pro Text Semibold (roles),
+Obviously Semibold (eyebrow — demo cut, covers the needed glyphs). The iOS status
+bar stays baked in the phone PNG.
