@@ -1,0 +1,26 @@
+{
+  "name": "tal-boss-carousel",
+  "version": "1.0.0",
+  "description": "Tal Boss — PM Leaders carousel looping GIF (Remotion)",
+  "private": true,
+  "scripts": {
+    "dev": "remotion studio",
+    "render-gif": "remotion render BossCarousel out/tal-boss-carousel.gif --codec=gif --every-nth-frame=2 --scale=0.5",
+    "render-mp4": "remotion render BossCarousel out/tal-boss-carousel.mp4 --codec=h264 --crf=18",
+    "still": "remotion still BossCarousel out/still.png",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.469",
+    "@remotion/google-fonts": "^4.0.469",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "remotion": "^4.0.469"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@types/web": "^0.0.349",
+    "typescript": "^6.0.3"
+  }
+}
