@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "remotion studio",
-    "render-gif": "remotion render BossCarousel out/tal-boss-carousel.gif --codec=gif --every-nth-frame=2 --scale=0.5",
+    "render-gif": "remotion render BossCarousel out/tal-boss-carousel.gif --codec=gif --every-nth-frame=2 --scale=0.625",
     "render-mp4": "remotion render BossCarousel out/tal-boss-carousel.mp4 --codec=h264 --crf=18",
-    "render-gif-screen": "remotion render BossCarouselScreen out/tal-boss-carousel-screen.gif --codec=gif --every-nth-frame=2 --scale=0.5",
+    "render-gif-screen": "remotion render BossCarouselScreen out/tal-boss-carousel-screen.gif --codec=gif --every-nth-frame=2 --scale=0.625",
     "render-mp4-screen": "remotion render BossCarouselScreen out/tal-boss-carousel-screen.mp4 --codec=h264 --crf=18",
     "still": "remotion still BossCarousel out/still.png",
     "upgrade": "remotion upgrade"
