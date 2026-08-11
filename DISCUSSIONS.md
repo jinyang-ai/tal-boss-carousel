@@ -1,4 +1,4 @@
-# Build log — every discussion & decision (2026-08-08)
+# Build log — every discussion & decision (2026-08-08 → 08-11)
 
 Chronological record of how this project went from a Figma still to the final
 looping GIFs, including every request, problem, and the reasoning behind each fix.
@@ -122,3 +122,58 @@ Akash Mehta, Meet Pathak, Kapil Thakur. Tapish opens the loop.
 - Verify loops empirically: render frame 0 and frame N, diff the pixels.
 - When a colour looks "off by a shade", sample pixels — perception lies,
   hex doesn't.
+
+---
+
+## 7. Engineering-leaders cut + app-icon logo (2026-08-10 → 08-11)
+
+Second pass, after the PM build shipped. Two things: a new cast, then a brand-mark swap.
+
+### 7.1 The engineering cut
+
+- **Request:** a parallel carousel for **engineering leaders** instead of PMs.
+- **How it reuses the PM build:** no layout/motion code was forked. `BossCarousel`
+  already took `cards` / `headline` / `headlineSize` as props, so the eng cut is
+  just a new card list (`cards-eng.ts`) + headline wired through two new
+  compositions in `Root.tsx` — `BossCarouselEng` (side-bleed) and
+  `BossCarouselEngScreen` (screen-only). `N_CARDS` / loop length derive from the
+  list, so the 6-card cast loops seamlessly at `45 × 6 = 270 f` (9 s).
+- **Cast (6, L→R):** Jayant P (Rippling), Ansuman S (Zepto), Rachit W (Headout),
+  Kiran K (WeWork India), Nikhil M (Zepto), Mayank A (Swish). Real LinkedIn
+  portraits + official company logos, same per-card crop approach as the PM cards.
+- **Badge adjacency:** two Zepto cards (Ansuman, Nikhil) are kept **3 apart** so
+  the same logo never lands on two consecutive cards as the loop wraps.
+- **Headline:** "400+ Engineering Leaders have joined Tal Boss" — longer than the
+  PM line, so `headlineSize` is passed at `52 × 1.5` to keep it on two lines.
+- **WeWork logo** is a black-on-white mark, so that badge uses the `white-shadow`
+  treatment instead of the purple ring.
+- **Render specs:** GIF `--scale=0.8`, MP4 `--scale=1.333` (a notch above the PM
+  cut). Outputs: `out/tal-eng-carousel-screen.{gif,mp4}` + `out/tal-eng-carousel.{gif,mp4}`.
+
+### 7.2 White wordmark → "tal BOSS" app icon
+
+- **Request:** replace the bottom-centre logo with the **rounded-square "tal BOSS"
+  app icon** (light gradient bg, dark text) and size it right.
+- The old mark was a flat white text wordmark (transparent bg, aspect 1.083); the
+  new one is a **square** app icon → the `WORDMARK` box became square, centred on
+  the old x-centre. Sized by rendering S/M/L stills (92 / 112 / 134 raw px): **134
+  overlapped the card**, 92 read small, **112 (Medium)** was the pick.
+- **Crowding fix:** Medium, bottom-anchored at the old wordmark baseline, grew
+  *upward* and its top intruded into the card's lowest text. Invisible on 1-line
+  roles (Jayant) but on **Ansuman's 2-line "Associate Director of Engineering"**
+  the icon touched the text. Fix: stop anchoring to the old baseline — drop the
+  icon into the **dark band below the card** (`card bottom raw 769 → frame bottom
+  900`), centred with equal `ICON_GAP` top and bottom. Side derives to `101 raw`,
+  so it fits the band cleanly and can never collide with card text again.
+- **Global by design:** `WORDMARK` is shared by all four comps, so the icon (and
+  the reposition) applies to the PM cut too; both casts were re-rendered so every
+  output carries the new mark.
+
+### 7.3 Reusable lessons (this pass)
+
+- Prop-driven comps pay off: a whole second cast cost one card file + two
+  `<Composition>` lines, zero layout code.
+- Size a bottom overlay against the **tallest** content variant, not the opener.
+  Frame 0 (1-line role) hid a collision that only the 2-line card exposed.
+- Anchor an overlay to the *space it lives in* (the band below the card), not to a
+  legacy element's baseline — the baseline was tuned for smaller artwork.

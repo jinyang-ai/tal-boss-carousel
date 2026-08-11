@@ -128,13 +128,24 @@ export const SCRIM = {
   fadeStart: 0.24,
 };
 
-// ---- Wordmark PNG (3249:31669) ---------------------------------------------
+// ---- Wordmark / app-icon PNG (3249:31669 replaced 2026-08-11) ---------------
+// Was the flat white "tal BOSS" wordmark; now the rounded-square app icon
+// (light gradient bg + dark text). Square asset -> square box, centred on the old
+// wordmark's x-centre. It sits in the dark band BELOW the card so it never crowds
+// the card's lowest text — 2-line roles (e.g. Ansuman "Associate Director of
+// Engineering") reach nearly to the card edge, and the old bottom-anchored Medium
+// overlapped them. Band = card bottom (raw 769) .. frame bottom (raw 900); the
+// icon is centred in it with equal ICON_GAP above and below. Tweak ICON_GAP.
+const ICON_CX = 360.03125; // old wordmark x-centre (315.59375 + 88.88/2)
+const CARD_BOTTOM = 346 + 423; // raw: CARD_TOP + CARD_H = 769
+const ICON_GAP = 15; // raw gap above (from card) & below (to frame bottom)
+const ICON_SIDE = FIGMA_H - CARD_BOTTOM - 2 * ICON_GAP; // raw square side = 101
 export const WORDMARK = {
-  src: "boss-carousel/tal-boss-wordmark.png",
-  x: sc(315.59375), // raw bbox x
-  y: sc(787), // raw bbox y
-  w: sc(88.88054656982422), // raw bbox w
-  h: sc(82.041015625), // raw bbox h
+  src: "boss-carousel/tal-boss-app-icon.png",
+  x: sc(ICON_CX - ICON_SIDE / 2),
+  y: sc(CARD_BOTTOM + ICON_GAP),
+  w: sc(ICON_SIDE),
+  h: sc(ICON_SIDE),
 };
 
 // ---- Neighbours -------------------------------------------------------------

@@ -1,7 +1,7 @@
 {
   "name": "tal-boss-carousel",
   "version": "1.0.0",
-  "description": "Tal Boss — PM Leaders carousel looping GIF (Remotion)",
+  "description": "Tal Boss \u2014 PM Leaders carousel looping GIF (Remotion)",
   "private": true,
   "scripts": {
     "dev": "remotion studio",
@@ -9,6 +9,10 @@
     "render-mp4": "remotion render BossCarousel out/tal-boss-carousel.mp4 --codec=h264 --crf=18",
     "render-gif-screen": "remotion render BossCarouselScreen out/tal-boss-carousel-screen.gif --codec=gif --every-nth-frame=2 --scale=0.625",
     "render-mp4-screen": "remotion render BossCarouselScreen out/tal-boss-carousel-screen.mp4 --codec=h264 --crf=18",
+    "render-gif-eng": "remotion render BossCarouselEng out/tal-eng-carousel.gif --codec=gif --every-nth-frame=2 --scale=0.8",
+    "render-mp4-eng": "remotion render BossCarouselEng out/tal-eng-carousel.mp4 --codec=h264 --crf=14 --scale=1.3333333",
+    "render-gif-eng-screen": "remotion render BossCarouselEngScreen out/tal-eng-carousel-screen.gif --codec=gif --every-nth-frame=2 --scale=0.8",
+    "render-mp4-eng-screen": "remotion render BossCarouselEngScreen out/tal-eng-carousel-screen.mp4 --codec=h264 --crf=14 --scale=1.3333333",
     "still": "remotion still BossCarousel out/still.png",
     "upgrade": "remotion upgrade"
   },

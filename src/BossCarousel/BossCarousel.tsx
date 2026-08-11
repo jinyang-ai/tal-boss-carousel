@@ -4,10 +4,11 @@ import {
   interpolate, spring, Easing,
 } from "remotion";
 import { CardStrip } from "./CardStrip";
+import { BossCard, CARDS } from "./cards";
 import { loadFonts } from "./fonts";
 import {
   COMP_W, COMP_H, BG, DIM, SCREEN_BG,
-  SLIDE, HOLD, CYCLE, N_CARDS, STEP, CARD_W,
+  SLIDE, HOLD, CYCLE, STEP, CARD_W,
   APERTURE, APERTURE_CX, PHONE, SCRIM, WORDMARK, HEADLINE, HEADLINE_COLOR, EYEBROW,
 } from "./layout";
 
@@ -21,9 +22,16 @@ const ENABLE_CENTER_EMPHASIS = false;
 const ENABLE_BADGE_POP = false;
 // -----------------------------------------------------------------------------
 
-export const BossCarousel: React.FC<{ showNeighbors?: boolean; pitch?: number }> = ({ showNeighbors = true, pitch = STEP }) => {
+export const BossCarousel: React.FC<{
+  showNeighbors?: boolean;
+  pitch?: number;
+  cards?: BossCard[]; // alternate cast (e.g. engineers); loop math derives from its length
+  headline?: string; // alternate headline text; geometry unchanged
+  headlineSize?: number; // px override so longer copy can stay on two lines
+}> = ({ showNeighbors = true, pitch = STEP, cards = CARDS, headline = HEADLINE.text, headlineSize = HEADLINE.fontSize }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const nCards = cards.length;
 
   // slide -> hold -> slide -> hold, forever
   const cycleIndex = Math.floor(frame / CYCLE);
@@ -36,10 +44,10 @@ export const BossCarousel: React.FC<{ showNeighbors?: boolean; pitch?: number }>
   const p = cycleIndex + progress;
 
   // wrap into one loop length so the strip never runs out
-  const loop = pitch * N_CARDS;
+  const loop = pitch * nCards;
   const travel = (((DIRECTION * p * pitch) % loop) + loop) % loop;
-  // base places us in the middle copy (invisible wrap); +CENTER0 centres Tapish at frame 0
-  const translateX = APERTURE_CX - CARD_W / 2 - (N_CARDS + CENTER0) * pitch + travel;
+  // base places us in the middle copy (invisible wrap); +CENTER0 centres card 0 at frame 0
+  const translateX = APERTURE_CX - CARD_W / 2 - (nCards + CENTER0) * pitch + travel;
 
   // badge pop: 0.9 -> 1.0 over the first frames of each HOLD
   let badgeScale = 1;
@@ -49,7 +57,7 @@ export const BossCarousel: React.FC<{ showNeighbors?: boolean; pitch?: number }>
   }
 
   const strip = (
-    <CardStrip translateX={translateX} step={pitch} centerEmphasis={ENABLE_CENTER_EMPHASIS} badgeScale={badgeScale} />
+    <CardStrip translateX={translateX} step={pitch} centerEmphasis={ENABLE_CENTER_EMPHASIS} badgeScale={badgeScale} cards={cards} />
   );
 
   return (
@@ -96,11 +104,11 @@ export const BossCarousel: React.FC<{ showNeighbors?: boolean; pitch?: number }>
         style={{
           position: "absolute", left: HEADLINE.x, top: HEADLINE.y, width: HEADLINE.w, height: HEADLINE.h,
           display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center",
-          fontFamily: "SF Pro Display", fontWeight: HEADLINE.fontWeight, fontSize: HEADLINE.fontSize,
+          fontFamily: "SF Pro Display", fontWeight: HEADLINE.fontWeight, fontSize: headlineSize,
           lineHeight: HEADLINE.lineHeight, color: HEADLINE_COLOR, letterSpacing: 0,
         }}
       >
-        <div>{HEADLINE.text}</div>
+        <div>{headline}</div>
       </div>
     </AbsoluteFill>
   );
