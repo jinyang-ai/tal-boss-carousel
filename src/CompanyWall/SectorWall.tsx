@@ -71,13 +71,15 @@ export const SectorWall: React.FC<{
   const u = height / 1080;
   const rows = SECTOR_ROWS[sector] ?? SECTOR_ROWS.fintech;
 
-  // fewer rows (small sectors) => scale the chips up so the wall still fills
-  // the frame instead of leaving a gap under the headline.
-  const twoRow = rows.length <= 2;
-  const logoH = (twoRow ? 78 : 62) * u;
-  const chipH = (twoRow ? 158 : 124) * u;
-  const gap = (twoRow ? 48 : 40) * u;
-  const rowGap = (twoRow ? 38 : 30) * u;
+  // Always 3 rows. Sectors with fewer logos get proportionally larger chips so
+  // the wall still fills the frame AND each row stays wider than the 1080 frame
+  // (a row narrower than the frame would let the marquee repeat a logo on screen).
+  const perRow = Math.max(...rows.map((r) => r.length));
+  const big = perRow <= 5;
+  const logoH = (big ? 74 : 62) * u;
+  const chipH = (big ? 146 : 124) * u;
+  const gap = (big ? 46 : 40) * u;
+  const rowGap = (big ? 34 : 30) * u;
 
   return (
     <AbsoluteFill style={{ background: INK, color: CREAM, fontFamily, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: `${46 * u}px 0 ${50 * u}px` }}>
